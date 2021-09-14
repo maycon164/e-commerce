@@ -12,24 +12,51 @@ require('dotenv').config({
 
 const api = process.env.API_URL;
 
-app.get(`${api}/products`, (req, res) => {
-    res.status(200).json({
-        id:1,
-        message:"OLÁ MEU AMIGO"
-    })
+const productSchema = mongoose.Schema({
+    name: String,
+    image: String,
+    countInStock: {
+        type: Number,
+        required: true
+    }
+})
+
+const Product = mongoose.model('Products', productSchema);
+
+
+app.get(`${api}/products`, async (req, res) => {
+    const productList = await Product.find();
+    
+    if(!productList) res.status(500).json({error: "Cannot get anything from MongoDB"});
+
+    res.status(200).json(productList);
 });
 
 app.post(`${api}/products`, (req, res) => {
-    const newProduct = req.body;
-    console.log(req.body)
-    newProduct.otherMessage = "TUDO BOM COM VOCE?"
-    res.status(200).json(newProduct);
+
+    const product = new Product({
+        name: req.body.name,
+        image: req.body.image,
+        countInStock: req.body.countInStock
+
+    })
+
+    product.save().then(createdProduct => {
+        res.status(201).json(createdProduct);
+    }).catch(error => {
+        res.status(500).json({
+            error,
+            success:false
+        });
+    })
+
 });
 
 //CONECTANDO AO MONGO DB
 mongoose.connect(process.env.CONNECTION_STRING, {
         useNewUrlParser: true,
-        useUnifiedTopology: true
+        useUnifiedTopology: true,
+        dbName: 'eshop-database'
     }).then(() => {
     console.log("Conectado ao mongoDB");
 }).catch( err => console.error(err))
