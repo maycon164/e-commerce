@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const mongoose = require('mongoose');
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
@@ -25,6 +26,13 @@ app.post(`${api}/products`, (req, res) => {
     res.status(200).json(newProduct);
 });
 
+//CONECTANDO AO MONGO DB
+mongoose.connect(process.env.CONNECTION_STRING, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    }).then(() => {
+    console.log("Conectado ao mongoDB");
+}).catch( err => console.error(err))
 
 app.listen(3000, () => {
     console.log(api);
