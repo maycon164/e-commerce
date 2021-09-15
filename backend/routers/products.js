@@ -1,4 +1,6 @@
 const {Product} = require('../models/product');
+const {Category} = require('../models/category');
+
 require('dotenv').config({
     path:'./backend/.env'
 })
@@ -14,27 +16,38 @@ module.exports = (app) => {
         res.status(200).json(productList);
     });
 
-    app.post(`${api}/product`, (req, res) => {
+    // CREATE PRODUCT and post method
+    app.post(`${api}/product`, async (req, res) => {
 
-        const product = new Product({
+        const category = await Category.findById(req.body.category);
+
+        if(!category) {
+            return res.status(404).json({message: "Invalid Category"});
+        }
+
+        let product = new Product({
             name: req.body.name,
+            description: req.body.description,
+            richDescription: req.body.richDescription, 
             image: req.body.image,
-            countInStock: req.body.countInStock
+            brand: req.body.brand,
+            price: req.body.price,
+            category: req.body.category,
+            countInStock: req.body.countInStock,
+            rating: req.body.rating,
+            numReviews: req.body.numReviews,
+            isFeatured: req.body.isFeatured
+        });
 
-        })
+        product = await product.save();
 
-        product.save().then(createdProduct => {
+        if(!product)
+            return res.status(500).json({message: "product cannot be created"});
         
-            res.status(201).json(createdProduct);
-        
-        }).catch(error => {
-        
-            res.status(500).json({
-                error,
-                success:false
-            });
-        
-        })
+        return res.status(200).json({
+            message: "Product created successfully",
+            product
+        });
 
     });
 }
