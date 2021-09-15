@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/maycon164/eShope#readme",
   "dependencies": {
+    "consign": "^0.1.6",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "mongoose": "^6.0.5",
