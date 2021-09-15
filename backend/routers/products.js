@@ -8,12 +8,22 @@ require('dotenv').config({
 module.exports = (app) => {
     const api = process.env.API_URL;
 
+    //Lista de todoso os product
     app.get(`${api}/product`, async (req, res) => {
-        const productList = await Product.find();
+        const productList = await Product.find().select('name price image');
 
         if(!productList) res.status(500).json({error: "Cannot get anything from MongoDB"});
 
         res.status(200).json(productList);
+    });
+
+    //find by productId
+    app.get(`${api}/product/:id`, async (req, res) => {
+        let product = await Product.findById(req.params.id);
+        
+        if(!product) return res.status(404).json(message="cannot find product");
+        
+        return res.json(product);
     });
 
     // CREATE PRODUCT and post method
