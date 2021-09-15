@@ -8,6 +8,7 @@ module.exports = (app) => {
 
     const api = process.env.API_URL;
 
+    //Listar todos
     app.get(`${api}/category`, async (req, res) => {
 
         const categoryList = await Category.find();
@@ -15,6 +16,16 @@ module.exports = (app) => {
         
         res.status(200).json(categoryList);
    
+    });
+
+    //find by id
+    app.get(`${api}/category/:id`, async (req, res) => {
+    
+        const category = await Category.findById(req.params.id);
+        
+        if(category) return res.status(200).json({success: true, category});
+        else return res.status(404).json({success: false, message: `cannot find category with id ${req.params.id}`});
+    
     });
 
     //Post Category
@@ -37,8 +48,36 @@ module.exports = (app) => {
         
     });
 
-    //DELETE METHOD
+    //update by id
+    app.put(`${api}/category/:id`, async (req, res) => {
+        
+        let category = await Category.findByIdAndUpdate( 
+            req.params.id,
+            {
+                name: req.body.name,
+                color: req.body.color,
+                icon: req.body.icon
+            },
+            {new: true}
+        )
 
+        if(!category){
+            res.status(400).json({
+                success: false,
+                message: `ìt wasnt be able update category with id ${req.params.id}`
+            })            
+        }
+        
+        res.status(200).json({
+            success: true, 
+            message: `Category with id ${req.params.id} it was updated`,
+            category
+        })
+
+
+    });
+
+    //DELETE METHOD
     app.delete(`${api}/category/:id`, (req, res) => {
         
         Category.findByIdAndRemove(req.params.id).then(category => {
