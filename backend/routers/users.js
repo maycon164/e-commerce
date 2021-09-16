@@ -7,7 +7,8 @@ require('dotenv').config({
 module.exports = (app) => {
 
     const api = process.env.API_URL;
-
+ 
+    //LISTA TODOS OS USUARIOS
     app.get(`${api}/user`, async (req, res) => {
 
         const userList = await User.find();
@@ -16,28 +17,33 @@ module.exports = (app) => {
         res.status(200).json(userList);
    
     });
+    
+    //Cadastrar novo user
+    app.post(`${api}/user`, async (req, res) => {
+        console.log(req.body);
 
-    app.post(`${api}/user`, (req, res) => {
+        let user = new User(req.body);
 
-        const user = new User({
+        /*let user = new User({
             name: req.body.name,
-            image: req.body.image,
-            countInStock: req.body.countInStock
+            email: req.body.email,
+            passwordHash: req.body.passwordHash,
+            phone: req.body.phone,
+            country: req.body.country,
+            city: req.body.city,
+            zip: req.body.zip,
+            street: req.body.street,
+            apartment: req.body.apartment,
+            isAdmin: req.body.isAdmin,
+        });*/
 
-        })
+        user = await user.save();
 
-        user.save().then(createdUser => {
-        
-            res.status(201).json(createdUser);
-        
-        }).catch(error => {
-        
-            res.status(500).json({
-                error,
-                success:false
-            });
-        
-        })
+        if(!user)
+            return res.status(400).send("the user cannot be created");
 
-    });
+        return res.status(200).json({success: true, user});
+
+    })
+
 }
