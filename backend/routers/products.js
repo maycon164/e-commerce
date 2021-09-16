@@ -1,5 +1,6 @@
 const {Product} = require('../models/product');
 const {Category} = require('../models/category');
+const mongoose = require('mongoose');
 
 require('dotenv').config({
     path:'./backend/.env'
@@ -10,7 +11,10 @@ module.exports = (app) => {
 
     //Lista de todoso os product
     app.get(`${api}/product`, async (req, res) => {
-        const productList = await Product.find().select('name price image');
+        const productList = await Product
+        .find()
+        .select('name price image description category')
+        .populate('category');
 
         if(!productList) res.status(500).json({error: "Cannot get anything from MongoDB"});
 
@@ -19,7 +23,9 @@ module.exports = (app) => {
 
     //find by productId
     app.get(`${api}/product/:id`, async (req, res) => {
-        let product = await Product.findById(req.params.id);
+        let product = await Product
+        .findById(req.params.id)
+        .populate('category');
         
         if(!product) return res.status(404).json(message="cannot find product");
         
@@ -60,4 +66,58 @@ module.exports = (app) => {
         });
 
     });
+
+    // UPDATE Product
+    app.put(`${api}/product/:id`, async (req, res) => {
+
+        if(!mongoose.isValidObjectId(req.params.id))
+            return res.status(404).json({message: "product id invalid"});
+
+        const category = await Category.findById(req.body.category);
+        
+        if(!category) 
+            return res.status(404).json({message: "category invalid"});
+
+        let product = await Product.findByIdAndUpdate(
+            req.params.id,
+            {
+                name: req.body.name,
+                description: req.body.description,
+                richDescription: req.body.richDescription, 
+                image: req.body.image,
+                brand: req.body.brand,
+                price: req.body.price,
+                category: req.body.category,
+                countInStock: req.body.countInStock,
+                rating: req.body.rating,
+                numReviews: req.body.numReviews,
+                isFeatured: req.body.isFeatured
+            },
+            {new:true}
+        )
+
+        if(!product) return res.status(500).json({message: 'Product cannot be able to be updated'}) 
+        
+        return res.status(200).json({
+            message: "Product it was successfully updated",
+            product
+        })
+
+    })
+
+    //Delete By id
+    app.delete(`${api}/product/:id`, async (req, res) => {
+        let product = await Product.findByIdAndRemove(req.params.id);
+        
+        if(!product)
+            return res.status(404).json({message: "Product not found"})
+
+        return res.status(200).json({
+            success: true, 
+            message:"Product successfully removed",
+            product
+        });
+    
+    });
+
 }
