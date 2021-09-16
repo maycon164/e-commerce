@@ -19,8 +19,16 @@ module.exports = (app) => {
     //Lista de todoso os product
     app.get(`${api}/product`, async (req, res) => {
         
+        let filter = {};
+        
+        if(req.query.categories){
+            filter = {
+                category: req.query.categories.split(',')
+            }
+        }
+
         const productList = await Product
-        .find()
+        .find(filter)
         .select('name price image description category')
         .populate('category');
 
@@ -140,7 +148,6 @@ module.exports = (app) => {
     app.get(`${api}/product/get/count`, async (req, res) => {
         let productCount = await Product.countDocuments({});
 
-
         if(!productCount) 
             return res.status(500).json({error: "Cannot get anything from db"});
 
@@ -149,6 +156,20 @@ module.exports = (app) => {
             count: productCount
         });
 
+    });
+
+    // isFeatured
+    app.get(`${api}/product/get/featured/:count`, async (req, res) => {
+        const count = req.params.count ? req.params.count : 0;
+        
+        let listProduct = await Product.find({
+            isFeatured: true
+        }).limit(+count);
+
+        if(!listProduct)
+            return res.status(500).json({message: "error",});
+        
+        return res.status(200).json(listProduct);
     });
 
 }
