@@ -9,25 +9,39 @@ require('dotenv').config({
 module.exports = (app) => {
     const api = process.env.API_URL;
 
+    function checkId(id, res){
+
+        if(!mongoose.Types.ObjectId.isValid(id))
+            return res.status(500).json({message:"product invalid id"})
+    
+    }
+
     //Lista de todoso os product
     app.get(`${api}/product`, async (req, res) => {
+        
         const productList = await Product
         .find()
         .select('name price image description category')
         .populate('category');
 
-        if(!productList) res.status(500).json({error: "Cannot get anything from MongoDB"});
+        if(!productList)
+            return res.status(500).json({error: "Cannot get anything from MongoDB"});
 
-        res.status(200).json(productList);
+        return res.status(200).json(productList);
+
     });
 
     //find by productId
     app.get(`${api}/product/:id`, async (req, res) => {
+        
+        checkId(req.params.id, res);
+
         let product = await Product
         .findById(req.params.id)
         .populate('category');
         
-        if(!product) return res.status(404).json(message="cannot find product");
+        if(!product) 
+            return res.status(404).json({message:"cannot find product"});
         
         return res.json(product);
     });
@@ -37,9 +51,9 @@ module.exports = (app) => {
 
         const category = await Category.findById(req.body.category);
 
-        if(!category) {
+        if(!category) 
             return res.status(404).json({message: "Invalid Category"});
-        }
+        
 
         let product = new Product({
             name: req.body.name,
@@ -70,8 +84,7 @@ module.exports = (app) => {
     // UPDATE Product
     app.put(`${api}/product/:id`, async (req, res) => {
 
-        if(!mongoose.isValidObjectId(req.params.id))
-            return res.status(404).json({message: "product id invalid"});
+        checkId(req.params.id, res);
 
         const category = await Category.findById(req.body.category);
         
@@ -96,7 +109,8 @@ module.exports = (app) => {
             {new:true}
         )
 
-        if(!product) return res.status(500).json({message: 'Product cannot be able to be updated'}) 
+        if(!product) 
+            return res.status(500).json({message: 'Product cannot be able to be updated'}) 
         
         return res.status(200).json({
             message: "Product it was successfully updated",
@@ -107,6 +121,9 @@ module.exports = (app) => {
 
     //Delete By id
     app.delete(`${api}/product/:id`, async (req, res) => {
+
+        checkId(req.params.id, res);    
+
         let product = await Product.findByIdAndRemove(req.params.id);
         
         if(!product)
@@ -118,6 +135,20 @@ module.exports = (app) => {
             product
         });
     
+    });
+
+    app.get(`${api}/product/get/count`, async (req, res) => {
+        let productCount = await Product.countDocuments({});
+
+
+        if(!productCount) 
+            return res.status(500).json({error: "Cannot get anything from db"});
+
+        return res.status(200).json({
+            success: true,
+            count: productCount
+        });
+
     });
 
 }
