@@ -73,6 +73,18 @@ module.exports = (app) => {
 
     })
 
+    app.delete(`${api}/user/:id`, async ( req, res ) => {
+        checkId(req.params.id);
+
+        let user = await User.findByIdAndDelete(req.params.id);
+        
+        if(!user)
+            return res.status(500).send("cannot delete user");
+        
+        return res.status(200).json(user);
+    
+    });
+
     //autenticando usuarios e token de acesso
     app.post(`${api}/user/login`, async (req, res) => {
         
