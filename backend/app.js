@@ -3,10 +3,12 @@ const app = express();
 const mongoose = require('mongoose');
 const consign = require('consign');
 const authJwt = require('./helpers/jwt');
+const errorHandler = require('./helpers/error-handler');
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
 app.use(authJwt);
+app.use(errorHandler);
 
 consign({
     verbose: true,
