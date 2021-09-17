@@ -2,6 +2,9 @@ const {User} = require('../models/user');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 
+const jwt = require('jsonwebtoken');
+
+
 require('dotenv').config({
     path:'./backend/.env'
 })
@@ -69,5 +72,35 @@ module.exports = (app) => {
         return res.status(200).json({success: true, user});
 
     })
+
+    //autenticando usuarios e token de acesso
+    app.post(`${api}/user/login`, async (req, res) => {
+        
+        let user = await User.findOne({email: req.body.email});
+
+        if(!user)
+            return res.status(400).send("user not found");
+        
+        if(user && bcrypt.compareSync(req.body.password, user.passwordHash)){
+            const secret = process.env.SECRET;
+            const token = jwt.sign(
+                {
+                    userId: user.id
+                },
+                secret,
+                {
+                    expiresIn:'1d'
+                }
+            )
+
+            res.status(200).send({user: user.email, token});
+
+        }else{
+
+            res.status(400).send("wrong password");
+        
+        }
+
+    });
 
 }
