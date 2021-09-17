@@ -44,7 +44,7 @@ module.exports = (app) => {
         return res.status(200).json(user);
     });
 
-    //Cadastrar novo user
+    //Cadastrar novo user, caminho para o admin
     app.post(`${api}/user`, async (req, res) => {
         //console.log(req.body);
 
@@ -84,6 +84,21 @@ module.exports = (app) => {
         return res.status(200).json(user);
     
     });
+
+    app.post(`${api}/user/register`, async (req, res) => {
+
+        let user = new User(req.body);
+        user.passwordHash = bcrypt.hashSync(req.body.password, 10);
+
+        user = await user.save();
+
+        if(!user)
+            return res.status(400).send("the user cannot be created");
+
+        return res.status(200).json({success: true, user});
+
+    })
+
 
     //autenticando usuarios e token de acesso
     app.post(`${api}/user/login`, async (req, res) => {

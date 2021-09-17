@@ -5,11 +5,18 @@ require('dotenv').config({
 })
 
 const secret = process.env.SECRET;
+const api = process.env.API;
 console.log(secret);
 
 const authJwt = expressJwt({
     secret: secret,
     algorithms: ['HS256']
-});
+}).unless({
+    path: [
+        {url:/\/api\/v1\/product(.*)/, methods: ['GET', 'OPTIONS']},
+        `${api}/user/login`,
+        `${api}/user/register`
+    ]
+})
 
 module.exports = authJwt;
