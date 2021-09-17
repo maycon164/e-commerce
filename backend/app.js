@@ -2,9 +2,11 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const consign = require('consign');
+const authJwt = require('./helpers/jwt');
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
+app.use(authJwt);
 
 consign({
     verbose: true,

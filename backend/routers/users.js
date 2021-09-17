@@ -95,13 +95,14 @@ module.exports = (app) => {
         
         if(user && bcrypt.compareSync(req.body.password, user.passwordHash)){
             const secret = process.env.SECRET;
+            
             const token = jwt.sign(
                 {
                     userId: user.id
                 },
                 secret,
                 {
-                    expiresIn:'1d'
+                    expiresIn:'1w'
                 }
             )
 
