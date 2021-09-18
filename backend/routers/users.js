@@ -85,6 +85,7 @@ module.exports = (app) => {
     
     });
 
+    //Register a new user with post method
     app.post(`${api}/user/register`, async (req, res) => {
 
         let user = new User(req.body);
@@ -113,7 +114,8 @@ module.exports = (app) => {
             
             const token = jwt.sign(
                 {
-                    userId: user.id
+                    userId: user.id,
+                    isAdmin: user.isAdmin
                 },
                 secret,
                 {
