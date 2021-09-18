@@ -8,6 +8,9 @@ function errorHandler(err, req, res, next){
     if(err.name === "ValidationError"){
         return res.status(401).json({message: err});
     }
+    if(err.name === "UnhandledPromiseRejectionWarning"){
+        console.log("I DUNNO: ", err);
+    }
 
     return res.status(500).json({err});
 }

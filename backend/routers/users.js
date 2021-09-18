@@ -73,6 +73,7 @@ module.exports = (app) => {
 
     })
 
+    //Delete user
     app.delete(`${api}/user/:id`, async ( req, res ) => {
         checkId(req.params.id);
 
@@ -131,6 +132,16 @@ module.exports = (app) => {
         
         }
 
+    });
+
+    //USER COUNT, contagem de usuarios
+    app.get(`${api}/user/get/count`, async (req, res) => {
+        let userCount = await User.countDocuments({});
+        
+        if(!userCount)
+            return res.status(500).send("It was not possible to count users");
+        
+        return res.status(200).json({userCount});
     });
 
 }
