@@ -1,4 +1,5 @@
 const {Order} = require('../models/order');
+const {OrderItem} = require('../models/order-item');
 
 require('dotenv').config({
     path:'./backend/.env'
@@ -17,27 +18,42 @@ module.exports = (app) => {
    
     });
 
-    app.post(`${api}/order`, (req, res) => {
+    app.post(`${api}/order`, async (req, res) => {
 
-        const order = new Order({
-            name: req.body.name,
-            image: req.body.image,
-            countInStock: req.body.countInStock
+        let orderItensIds = Promise.all (req.body.orderItems.map(async orderItem => {
+            
+            let newOrderItem = new OrderItem({
+                quantity: orderItem.quantity,
+                product : orderItem.product
+            })
 
-        })
+            newOrderItem = await newOrderItem.save();
 
-        order.save().then(createdOrder => {
-        
-            res.status(201).json(createdOrder);
-        
-        }).catch(error => {
-        
-            res.status(500).json({
-                error,
-                success:false
-            });
-        
-        })
+            return newOrderItem._id;
+
+        }));
+
+        let orderItensIdsResolved = await orderItensIds;
+
+        let order = new Order({
+            orderItems: orderItensIdsResolved,
+            shippingAddress1: req.body.shippingAddress1,
+            shippingAddress2: req.body.shippingAddress2,
+            city: req.body.city,
+            zip: req.body.zip,
+            country: req.body.country,
+            phone: req.body.phone,
+            status: req.body.status,
+            totalPrice: req.body.totalPrice,
+            user: req.body.user
+        });
+
+        order = await order.save();
+
+        if(!order)
+            return res.status(400).send("the order cannot be created");
+
+        return res.status(200).send(order);
 
     });
 }
