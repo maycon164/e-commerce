@@ -155,4 +155,29 @@ module.exports = (app) => {
         return res.status(200).json({ orderCount });
 
     });
+
+    //pedidos do usuario
+    app.get(`${api}/order/get/userorders/:userid`, async (req, res) => {
+
+        let userOrderList = await Order.find({ user: req.params.userid })
+            .populate('user', 'name')
+            .populate({
+                path: 'orderItems',
+                populate: {
+                    path: 'product',
+                    select: 'name description price',
+
+                    populate: {
+                        path: 'category',
+                        select: 'name'
+                    }
+                }
+            });
+
+        if(!userOrderList)
+            return res.status(500).json({success: false});
+        
+        return res.send(userOrderList);
+    });
+
 }
