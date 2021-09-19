@@ -85,7 +85,7 @@ module.exports = (app) => {
 
         order = await order.save();
 
-        if(!order)
+        if (!order)
             return res.status(400).send("the order cannot be created");
 
         return res.status(200).send(order);
@@ -131,4 +131,28 @@ module.exports = (app) => {
 
     });
 
+    //Total das vendas
+    app.get(`${api}/order/get/totalsales`, async (req, res) => {
+
+        let totalSales = await Order.aggregate([
+            { $group: { _id: null, totalSales: { $sum: '$totalPrice' } } }
+        ])
+
+        if (!totalSales)
+            return res.status(400).send("the order sales cannot be generated")
+
+        return res.status(200).send({ "totalsales": totalSales.pop().totalSales });
+
+    });
+
+    //Quantidade de pedidos
+    app.get(`${api}/order/get/count`, async (req, res) => {
+        let orderCount = await Order.countDocuments({});
+
+        if (!orderCount)
+            return res.status(500).json({ message: "cannot get total order" });
+
+        return res.status(200).json({ orderCount });
+
+    });
 }
