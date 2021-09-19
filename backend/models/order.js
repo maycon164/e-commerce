@@ -54,7 +54,7 @@ const orderSchema = mongoose.Schema({
 
     dateOrdered: {
         type: Date,
-        default: Date.now;
+        default: Date.now
     }
 });
 
