@@ -14,6 +14,7 @@ const authJwt = expressJwt({
     isRevoked: isRevoked
 }).unless({
     path: [
+        {url:/\/api\/v1\/public\/upload(.*)/, methods: ['GET', 'OPTIONS']},
         {url:/\/api\/v1\/product(.*)/, methods: ['GET', 'OPTIONS']},
         {url:/\/api\/v1\/category(.*)/, methods: ['GET', 'OPTIONS']},
         `${api}/user/login`,

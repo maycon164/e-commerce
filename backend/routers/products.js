@@ -216,9 +216,7 @@ module.exports = (app) => {
         const basePath = `${req.protocol}://${req.get('host')}/public/upload/`;
 
         if (files) {
-            files.map(file => {
-                imagesPath.push(`${basePath}${file.filename}`);
-            });
+            imagesPath = files.map(file => `${basePath}${file.filename}`);
         }
 
         let product = await Product.findByIdAndUpdate(

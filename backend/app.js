@@ -7,6 +7,7 @@ const errorHandler = require('./helpers/error-handler');
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
+app.use('/public/upload', express.static(__dirname + '/public/upload'));
 app.use(authJwt);
 app.use(errorHandler);
 
