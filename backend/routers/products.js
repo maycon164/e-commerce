@@ -89,6 +89,11 @@ module.exports = (app) => {
         if (!category)
             return res.status(404).json({ message: "Invalid Category" });
 
+        const file = req.file;
+
+        if (!file)
+            return res.status(500).json({ message: "no file in the request" });
+
         const filename = req.file.filename;
         const basePath = `${req.protocol}://${req.get('host')}/public/upload/`;
 
