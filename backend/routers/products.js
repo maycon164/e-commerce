@@ -3,18 +3,18 @@ const { Category } = require('../models/category');
 const mongoose = require('mongoose');
 const multer = require('multer');
 
-const VALID_EXTENSION_MAP ={
-    'image/png':'png',
-    'image/jpg':'jpg',
-    'image/jpeg':'jpeg'
+const VALID_EXTENSION_MAP = {
+    'image/png': 'png',
+    'image/jpg': 'jpg',
+    'image/jpeg': 'jpeg'
 }
 
 //CONFIGURANDO LOCAL DE UPLOAD
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         let uploadError = new Error('Invalid type of file');
-        
-        if(VALID_EXTENSION_MAP[file.mimetype]){
+
+        if (VALID_EXTENSION_MAP[file.mimetype]) {
             uploadError = null;
         }
 
@@ -36,6 +36,7 @@ require('dotenv').config({
 module.exports = (app) => {
     const api = process.env.API_URL;
 
+    //VALIDAR ID DO PRODUTO
     function checkId(id, res) {
 
         if (!mongoose.Types.ObjectId.isValid(id))
@@ -205,5 +206,36 @@ module.exports = (app) => {
 
         return res.status(200).json(listProduct);
     });
+
+    //ENVIANDO ARRAY DE IMAGES PARA O PRODUTO
+    app.put(`${api}/product/images-gallary/:id`, upload.array('images', 10), async (req, res) => {
+        checkId(req.params.id, res);
+
+        let files = req.files;
+        let imagesPath = [];
+        const basePath = `${req.protocol}://${req.get('host')}/public/upload/`;
+
+        if (files) {
+            files.map(file => {
+                imagesPath.push(`${basePath}${file.filename}`);
+            });
+        }
+
+        let product = await Product.findByIdAndUpdate(
+            req.params.id,
+            {
+                images: imagesPath
+            },
+            { new: true }
+        );
+
+        if (!product)
+            return res.status(500).json({ message: 'Product cannot be able to be updated' })
+
+        return res.status(200).json({
+            message: "Product it was successfully updated",
+            product
+        })
+    })
 
 }
